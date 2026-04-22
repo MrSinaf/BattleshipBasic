@@ -18,11 +18,20 @@ public class Loading : Scene
 	public override void Start()
 	{
 		var uiTexture = Vault.GetAsset<Texture2D>("ui")!;
+		canvas.root.AddChild(new Image(uiTexture)
+		{
+			scale = new Vector2(8),
+			size = new Vector2Int(130, 22),
+			pivot = new Vector2(0.5F),
+			anchors = new Vector2(0.5F, 0.75F),
+			uv = uiTexture.GetUVRegion(new RectInt(0, 0, 130, 22))
+		});
 		canvas.root.AddChild(loadingIcon = new Image(uiTexture)
 		{
 			scale = new Vector2(8),
 			size = new Vector2Int(16, 16),
-			pivotAndAnchors = new Vector2(0.5F),
+			pivot = new Vector2(0.5F),
+			anchors = new Vector2(0.5F, 0.25F),
 			uv = uiTexture.GetUVRegion(new RectInt(0, 22, 16, 16))
 		});
 	}
