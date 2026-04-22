@@ -4,6 +4,8 @@ using Ratelite.Resources;
 using Ratelite.UI;
 using Ratelite.UI.Widgets;
 
+Stage.loadingScene = new Loading();
+
 R.CreateGame("Battleship Basic")
  .AddModule<UIModule>()
  .LoadingAssets(async progress =>
