@@ -7,8 +7,8 @@ namespace BattleshipBasic.Scenes;
 
 public class Loading : Scene
 {
-	private Canvas canvas;
-	private Image loadingIcon;
+	private Canvas canvas = null!;
+	private Image loadingIcon = null!;
 	
 	public override void Init()
 	{

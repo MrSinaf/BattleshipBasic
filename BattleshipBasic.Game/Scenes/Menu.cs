@@ -1,4 +1,5 @@
-﻿using Ratelite;
+﻿using BattleshipBasic.Core;
+using Ratelite;
 using Ratelite.Resources;
 using Ratelite.UI;
 using Ratelite.UI.Widgets;
@@ -17,6 +18,7 @@ public class Menu : Scene
 	public override void Start()
 	{
 		canvas.root.padding = new Region(10);
+		var uiTexture = Vault.GetAsset<Texture2D>("ui")!;
 		var title = new Layout
 		{
 			orientation = Orientation.Vertical,
@@ -26,9 +28,11 @@ public class Menu : Scene
 			alignment = 1
 		};
 		title.AddChild(
-			new Image(Vault.GetAsset<Texture2D>("ui")!)
+			new Image(uiTexture)
 			{
-				scale = new Vector2(8)
+				size = new Vector2Int(130, 22),
+				scale = new Vector2(8),
+				uv = uiTexture.GetUVRegion(new RectInt(0, 0, 130, 22))
 			}
 		);
 		title.AddChild(new Label("Développé par PurrVert"));
@@ -45,14 +49,14 @@ public class Menu : Scene
 		buttons.AddChild(new Button("Quitter", () => { }));
 		canvas.root.AddChild(buttons);
 		
-		canvas.root.AddChild(
-			new TextInput
-			{
-				placeholder = "Pseudo",
-				value = Environment.GetEnvironmentVariable("USERNAME") ?? string.Empty,
-				pivotAndAnchors = new Vector2(0.5F, 0),
-				position = new Vector2(0, 60)
-			}
-		);
+		var nameInput = new TextInput
+		{
+			placeholder = "Pseudo",
+			value = Client.username,
+			pivotAndAnchors = new Vector2(0.5F, 0),
+			position = new Vector2(0, 60)
+		};
+		nameInput.onValueChanged += name => Client.username = name;
+		canvas.root.AddChild(nameInput);
 	}
 }
