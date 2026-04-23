@@ -6,4 +6,5 @@
   <Project Path="../Ratelite/Ratelite.UI/Ratelite.UI.csproj" />
   <Project Path="BattleshipBasic.Game/BattleshipBasic.Game.csproj" />
   <Project Path="BattleshipBasic.Server/BattleshipBasic.Server.csproj" />
+  <Project Path="BattleshipBasic.Shared/BattleshipBasic.Shared.csproj" />
 </Solution>
