@@ -1,43 +1,46 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
-using Ratelite;
+﻿using BattleshipBasic.Shared;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace BattleshipBasic.Core;
 
 public static class Client
 {
-	private static HubConnection? hub;
-	public static event Action<string> onPlayerJoined = delegate { };
-	public static event Action<string, string> onMessageReceived = delegate { };
+	public static HubConnection hub = null!;
+	public static string? roomCode;
 	
-	public static void Connection()
+	public static event Action<PlayerJoinedEvent> playerJoined = delegate { };
+	
+	public static string username = Environment.GetEnvironmentVariable("USERNAME") ?? string.Empty;
+	public static string? enemy;
+	
+	public static async Task Connection()
 	{
 		hub = new HubConnectionBuilder()
 			  .WithUrl("https://localhost:7135/room")
 			  .WithAutomaticReconnect()
 			  .Build();
-		
-		hub.On<string>(
-			"PlayerJoined",
-			id =>
-			{
-				onPlayerJoined(id);
-				Log.Write($"Player joined : {id}", Log.Level.Info);
-			}
-		);
-		hub.On<string, string>(
-			"Message",
-			(id, message) =>
-			{
-				onMessageReceived(id, message);
-				Log.Write($"{id} : {message}", Log.Level.Info);
-			}
-		);
-		hub.StartAsync().Wait();
-		hub.InvokeAsync("JoinRoom", "room-1").Wait();
+		hub.On<PlayerJoinedEvent>("PlayerJoined", e => playerJoined.Invoke(e));
+		playerJoined += e => enemy = e.username;
+		await hub.StartAsync();
 	}
 	
-	public static void SendMessage(string message)
+	public static async Task CreateRoom()
 	{
-		hub?.InvokeAsync("SendMessage", "room-1", message).Wait();
+		var response = await hub.InvokeAsync<CreateRoomResponse>(
+			"CreateRoom",
+			new CreateRoomRequest(username)
+		);
+		roomCode = response.roomCode;
+		enemy = null;
+	}
+	
+	public static async Task<JoinRoomResponse> JoinRoom(string roomCode)
+	{
+		var response = await hub.InvokeAsync<JoinRoomResponse>(
+			"JoinRoom",
+			new JoinRoomRequest(username, Client.roomCode = roomCode)
+		);
+		enemy = response.hostName;
+		return response;
 	}
 }

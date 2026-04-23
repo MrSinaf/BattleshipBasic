@@ -10,5 +10,5 @@ if (app.Environment.IsDevelopment())
 	app.MapOpenApi();
 
 app.UseHttpsRedirection();
-app.MapHub<Room>("/room");
+app.MapHub<RoomHub>("/room");
 app.Run();

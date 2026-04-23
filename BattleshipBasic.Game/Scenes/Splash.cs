@@ -1,4 +1,5 @@
-﻿using Ratelite;
+﻿using BattleshipBasic.Core;
+using Ratelite;
 using Ratelite.Resources;
 using Ratelite.UI;
 using Ratelite.UI.Widgets;
@@ -23,6 +24,8 @@ public class Splash : Scene
 			anchors = new Vector2(0.5F),
 			scale = new Vector2(5)
 		});
+		
+		Task.Run(Client.Connection);
 	}
 	
 	public override void Update()

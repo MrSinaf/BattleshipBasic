@@ -9,6 +9,8 @@ namespace BattleshipBasic.Scenes;
 public class Menu : Scene
 {
 	private Canvas canvas = null!;
+	private Label message = null!;
+	private TextInput codeInput = null!;
 	
 	public override void Init()
 	{
@@ -37,6 +39,20 @@ public class Menu : Scene
 		);
 		title.AddChild(new Label("Développé par PurrVert"));
 		canvas.root.AddChild(title);
+		canvas.root.AddChild(
+			message = new Label(string.Empty)
+			{
+				pivotAndAnchors = new Vector2(0.5F)
+			}
+		);
+		codeInput = new TextInput
+		{
+			placeholder = "Code du lobby",
+			pivotAndAnchors = new Vector2(0.5F, 0),
+			position = new Vector2(0, 35)
+		};
+		codeInput.onValueChanged += code => Client.roomCode = code;
+		canvas.root.AddChild(codeInput);
 		
 		var buttons = new Layout
 		{
@@ -44,8 +60,17 @@ public class Menu : Scene
 			pivotAndAnchors = new Vector2(0.5F, 0),
 			spacing = 10
 		};
-		buttons.AddChild(new Button("Héberger", () => { }));
-		buttons.AddChild(new Button("Rejoindre", () => { }));
+		buttons.AddChild(
+			new Button(
+				"Héberger",
+				() =>
+				{
+					Client.CreateRoom().Wait();
+					Stage.Load(new Lobby(true));
+				}
+			)
+		);
+		buttons.AddChild(new Button("Rejoindre", OnJoinClick));
 		buttons.AddChild(new Button("Quitter", () => { }));
 		canvas.root.AddChild(buttons);
 		
@@ -53,10 +78,36 @@ public class Menu : Scene
 		{
 			placeholder = "Pseudo",
 			value = Client.username,
-			pivotAndAnchors = new Vector2(0.5F, 0),
-			position = new Vector2(0, 60)
+			pivotAndAnchors = Vector2.zero,
+			position = new Vector2(20)
 		};
 		nameInput.onValueChanged += name => Client.username = name;
 		canvas.root.AddChild(nameInput);
+	}
+	
+	private void OnJoinClick()
+	{
+		var value = codeInput.value;
+		if (value == string.Empty)
+		{
+			message.tint = new Color(0xCE333E);
+			message.text = "Veuillez entrer un code pour le lobby.";
+			return;
+		}
+		
+		message.tint = Color.cyan;
+		message.text = "Connexion en cours...";
+		Task.Run(async () =>
+			{
+				var response = await Client.JoinRoom(value);
+				if (response.success)
+					Stage.Load(new Lobby(false));
+				else
+				{
+					message.tint = new Color(0xCE333E);
+					message.text = "Le code du lobby est invalide!";
+				}
+			}
+		);
 	}
 }
