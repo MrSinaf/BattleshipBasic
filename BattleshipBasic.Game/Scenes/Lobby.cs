@@ -18,6 +18,15 @@ public class Lobby(bool hosting) : Scene
 		canvas = AddPlugin<Canvas>();
 		Window.current.keyPressed += OnKeyPressed;
 		Client.playerJoined += OnPlayerJoined;
+		Client.playerLeft += OnPlayerLeft;
+	}
+	
+	private void OnPlayerLeft(PlayerLeftEvent _)
+	{
+		if (hosting)
+			playerName.text = string.Empty;
+		else
+			Stage.Load(new Menu("L'hôte du lobby s'est déconnecté."));
 	}
 	
 	public override void Start()
@@ -53,10 +62,19 @@ public class Lobby(bool hosting) : Scene
 		canvas.root.AddChild(layout);
 	}
 	
+	public override async Task Load()
+	{
+		if (hosting)
+			await Client.CreateRoom();
+		else
+			playerName.text = string.Empty;
+	}
+	
 	public override void Unload()
 	{
 		Window.current.keyPressed -= OnKeyPressed;
 		Client.playerJoined -= OnPlayerJoined;
+		Client.playerLeft -= OnPlayerLeft;
 	}
 	
 	private void OnPlayerJoined(PlayerJoinedEvent e)

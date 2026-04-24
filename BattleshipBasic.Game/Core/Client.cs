@@ -1,5 +1,6 @@
 ﻿using BattleshipBasic.Shared;
 using Microsoft.AspNetCore.SignalR.Client;
+using Ratelite;
 
 namespace BattleshipBasic.Core;
 
@@ -9,6 +10,7 @@ public static class Client
 	public static string? roomCode;
 	
 	public static event Action<PlayerJoinedEvent> playerJoined = delegate { };
+	public static event Action<PlayerLeftEvent> playerLeft = delegate { };
 	
 	public static string username = Environment.GetEnvironmentVariable("USERNAME") ?? string.Empty;
 	public static string? enemy;
@@ -20,6 +22,7 @@ public static class Client
 			  .WithAutomaticReconnect()
 			  .Build();
 		hub.On<PlayerJoinedEvent>("PlayerJoined", e => playerJoined.Invoke(e));
+		hub.On<PlayerLeftEvent>("PlayerLeft", e => playerLeft.Invoke(e));
 		playerJoined += e => enemy = e.username;
 		await hub.StartAsync();
 	}
@@ -30,7 +33,7 @@ public static class Client
 			"CreateRoom",
 			new CreateRoomRequest(username)
 		);
-		roomCode = response.roomCode;
+		Window.current.SetClipboardText(roomCode = response.roomCode);
 		enemy = null;
 	}
 	
@@ -42,5 +45,12 @@ public static class Client
 		);
 		enemy = response.hostName;
 		return response;
+	}
+	
+	public static async Task LeaveRoom()
+	{
+		if (roomCode == null) return;
+		await hub.InvokeAsync("LeaveRoom");
+		roomCode = null;
 	}
 }

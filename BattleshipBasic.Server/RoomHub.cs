@@ -8,6 +8,9 @@ public class RoomHub : Hub
 	private static readonly Dictionary<string, Room> rooms = [];
 	private static readonly Dictionary<string, string> players = [];
 	
+	public override async Task OnDisconnectedAsync(Exception? exception)
+		=> await LeaveRoom();
+	
 	public async Task<CreateRoomResponse> CreateRoom(CreateRoomRequest request)
 	{
 		const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -40,5 +43,22 @@ public class RoomHub : Hub
 			new PlayerJoinedEvent(request.username)
 		);
 		return new JoinRoomResponse(true, room.playerA.name);
+	}
+	
+	public async Task LeaveRoom()
+	{
+		if (players.TryGetValue(Context.ConnectionId, out var roomCode))
+		{
+			if (rooms.TryGetValue(roomCode, out var room))
+			{
+				if (room.playerA.id == Context.ConnectionId)
+					rooms.Remove(roomCode);
+				else
+					room.playerB = null;
+			}
+			players.Remove(Context.ConnectionId);
+			await Clients.OthersInGroup(roomCode).SendAsync("PlayerLeft", new PlayerLeftEvent());
+			await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomCode);
+		}
 	}
 }

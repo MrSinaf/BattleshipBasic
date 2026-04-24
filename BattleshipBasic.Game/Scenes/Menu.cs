@@ -6,7 +6,7 @@ using Ratelite.UI.Widgets;
 
 namespace BattleshipBasic.Scenes;
 
-public class Menu : Scene
+public class Menu(string? errorMessage = null) : Scene
 {
 	private Canvas canvas = null!;
 	private Label message = null!;
@@ -16,6 +16,9 @@ public class Menu : Scene
 	{
 		canvas = AddPlugin<Canvas>();
 	}
+	
+	public override async Task Load()
+		=> await Client.LeaveRoom();
 	
 	public override void Start()
 	{
@@ -60,16 +63,11 @@ public class Menu : Scene
 			pivotAndAnchors = new Vector2(0.5F, 0),
 			spacing = 10
 		};
-		buttons.AddChild(
-			new Button(
-				"Héberger",
-				() =>
-				{
-					Client.CreateRoom().Wait();
-					Stage.Load(new Lobby(true));
-				}
-			)
-		);
+		buttons.AddChild(new Button("Héberger", () =>
+			{
+				Stage.Load(new Lobby(true));
+			}
+		));
 		buttons.AddChild(new Button("Rejoindre", OnJoinClick));
 		buttons.AddChild(new Button("Quitter", () => { }));
 		canvas.root.AddChild(buttons);
@@ -83,6 +81,9 @@ public class Menu : Scene
 		};
 		nameInput.onValueChanged += name => Client.username = name;
 		canvas.root.AddChild(nameInput);
+		
+		if (errorMessage != null)
+			SetErrorMessage(errorMessage);
 	}
 	
 	private void OnJoinClick()
@@ -90,24 +91,31 @@ public class Menu : Scene
 		var value = codeInput.value;
 		if (value == string.Empty)
 		{
-			message.tint = new Color(0xCE333E);
-			message.text = "Veuillez entrer un code pour le lobby.";
+			SetErrorMessage("Veuillez entrer un code pour le lobby.");
 			return;
 		}
 		
-		message.tint = Color.cyan;
-		message.text = "Connexion en cours...";
+		SetInfoMessage("Connexion en cours...");
 		Task.Run(async () =>
 			{
 				var response = await Client.JoinRoom(value);
 				if (response.success)
 					Stage.Load(new Lobby(false));
 				else
-				{
-					message.tint = new Color(0xCE333E);
-					message.text = "Le code du lobby est invalide!";
-				}
+					SetErrorMessage("Le code du lobby est invalide!");
 			}
 		);
+	}
+	
+	private void SetErrorMessage(string error)
+	{
+		message.tint = new Color(0xCE333E);
+		message.text = error;
+	}
+	
+	private void SetInfoMessage(string infos)
+	{
+		message.tint = Color.cyan;
+		message.text = infos;
 	}
 }
