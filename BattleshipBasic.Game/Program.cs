@@ -13,12 +13,12 @@ R.CreateGame("Battleship Basic")
 		 await Vault.LoadResource<BitmapFont>(
 			 "fonts/tommy.ttf",
 			 "big",
-			 new BitmapFont.Config(new Vector2Int(256), 32, -1)
+			 new BitmapFont.Config(new Vector2Int(256), 32)
 		 );
 		 await Vault.LoadResource<BitmapFont>(
 			 "fonts/tommy.ttf",
 			 "default",
-			 new BitmapFont.Config(new Vector2Int(256), 18, -1)
+			 new BitmapFont.Config(new Vector2Int(256), 18)
 		 );
 		 UIPrefab.Add<Label>(string.Empty, LabelPrefab);
 		 UIPrefab.Add<Label>("big", LabelPrefabBig);

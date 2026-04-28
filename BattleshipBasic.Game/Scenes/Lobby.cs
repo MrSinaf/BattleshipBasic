@@ -1,5 +1,7 @@
 ﻿using BattleshipBasic.Core;
 using BattleshipBasic.Shared;
+using BattleshipBasic.UI;
+using Microsoft.AspNetCore.SignalR.Client;
 using Ratelite;
 using Ratelite.UI;
 using Ratelite.UI.Widgets;
@@ -10,8 +12,8 @@ public class Lobby(bool hosting) : Scene
 {
 	private Canvas canvas = null!;
 	
-	public Label hostName = null!;
-	public Label playerName = null!;
+	private PlayerPanel playerA = null!;
+	private PlayerPanel playerB = null!;
 	
 	public override void Init()
 	{
@@ -19,14 +21,6 @@ public class Lobby(bool hosting) : Scene
 		Window.current.keyPressed += OnKeyPressed;
 		Client.playerJoined += OnPlayerJoined;
 		Client.playerLeft += OnPlayerLeft;
-	}
-	
-	private void OnPlayerLeft(PlayerLeftEvent _)
-	{
-		if (hosting)
-			playerName.text = string.Empty;
-		else
-			Stage.Load(new Menu("L'hôte du lobby s'est déconnecté."));
 	}
 	
 	public override void Start()
@@ -46,18 +40,24 @@ public class Lobby(bool hosting) : Scene
 			}
 		);
 		
-		var layout = new Layout();
-		layout.AddChild(hostName = new Label { tint = Color.green });
-		layout.AddChild(playerName = new Label { tint = Color.red });
+		var layout = new Layout
+		{
+			spacing = 15,
+			pivotAndAnchors = new Vector2(0.5F, 0.75F),
+			orientation = Orientation.Horizontal
+		};
+		layout.AddChild(playerA = new PlayerPanel('A'));
+		layout.AddChild(playerB = new PlayerPanel('B'));
+		
 		if (hosting)
 		{
-			hostName.text = Client.username;
-			playerName.text = Client.enemy ?? string.Empty;
+			playerA.username = Client.username;
+			playerB.username = Client.enemy ?? string.Empty;
 		}
 		else
 		{
-			hostName.text = Client.enemy ?? string.Empty;
-			playerName.text = Client.username;
+			playerA.username = Client.enemy ?? string.Empty;
+			playerB.username = Client.username;
 		}
 		canvas.root.AddChild(layout);
 	}
@@ -66,8 +66,6 @@ public class Lobby(bool hosting) : Scene
 	{
 		if (hosting)
 			await Client.CreateRoom();
-		else
-			playerName.text = string.Empty;
 	}
 	
 	public override void Unload()
@@ -79,7 +77,15 @@ public class Lobby(bool hosting) : Scene
 	
 	private void OnPlayerJoined(PlayerJoinedEvent e)
 	{
-		playerName.text = e.username;
+		playerB.username = e.username;
+	}
+	
+	private void OnPlayerLeft(PlayerLeftEvent _)
+	{
+		if (hosting)
+			playerB.SetEmpty();
+		else
+			Stage.Load(new Menu("L'hôte du lobby s'est déconnecté."));
 	}
 	
 	private static void OnKeyPressed(Key key, int _)

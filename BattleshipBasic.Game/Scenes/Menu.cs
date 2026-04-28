@@ -1,4 +1,5 @@
 ﻿using BattleshipBasic.Core;
+using Microsoft.AspNetCore.SignalR.Client;
 using Ratelite;
 using Ratelite.Resources;
 using Ratelite.UI;
@@ -52,7 +53,8 @@ public class Menu(string? errorMessage = null) : Scene
 		{
 			placeholder = "Code du lobby",
 			pivotAndAnchors = new Vector2(0.5F, 0),
-			position = new Vector2(0, 35)
+			position = new Vector2(0, 35),
+			maxLenght = 8
 		};
 		codeInput.onValueChanged += code => Client.roomCode = code;
 		canvas.root.AddChild(codeInput);
@@ -63,11 +65,7 @@ public class Menu(string? errorMessage = null) : Scene
 			pivotAndAnchors = new Vector2(0.5F, 0),
 			spacing = 10
 		};
-		buttons.AddChild(new Button("Héberger", () =>
-			{
-				Stage.Load(new Lobby(true));
-			}
-		));
+		buttons.AddChild(new Button("Héberger", () => Stage.Load(new Lobby(true))));
 		buttons.AddChild(new Button("Rejoindre", OnJoinClick));
 		buttons.AddChild(new Button("Quitter", () => { }));
 		canvas.root.AddChild(buttons);
@@ -77,7 +75,7 @@ public class Menu(string? errorMessage = null) : Scene
 			placeholder = "Pseudo",
 			value = Client.username,
 			pivotAndAnchors = Vector2.zero,
-			position = new Vector2(20)
+			position = new Vector2(20),
 		};
 		nameInput.onValueChanged += name => Client.username = name;
 		canvas.root.AddChild(nameInput);

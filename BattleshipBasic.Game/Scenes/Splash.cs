@@ -1,4 +1,5 @@
 ﻿using BattleshipBasic.Core;
+using Microsoft.AspNetCore.SignalR.Client;
 using Ratelite;
 using Ratelite.Resources;
 using Ratelite.UI;
@@ -10,7 +11,9 @@ public class Splash : Scene
 {
 	private Canvas canvas = null!;
 	private Image icon = null!;
+	
 	private float time;
+	private bool connected;
 	
 	public override void Init()
 	{
@@ -24,7 +27,7 @@ public class Splash : Scene
 			anchors = new Vector2(0.5F),
 			scale = new Vector2(5)
 		});
-		
+	
 		Task.Run(Client.Connection);
 	}
 	
@@ -32,17 +35,20 @@ public class Splash : Scene
 	{
 		time += Time.delta;
 		
-		icon.opacity = time;
-		if (time > 1)
+		if (time < 2)
 		{
-			icon.position = new Vector2(
-				Random.Shared.Next(-5, 5),
-				Random.Shared.Next(-5, 5)
-			);
-			icon.scale += new Vector2(Time.delta * 2);
+			icon.opacity = time;
+			if (time > 1)
+			{
+				icon.position = new Vector2(
+					Random.Shared.Next(-5, 5),
+					Random.Shared.Next(-5, 5)
+				);
+				icon.scale += new Vector2(Time.delta * 2);
+			}
 		}
 		
-		if (time > 2)
+		if (time > 2 && Client.hub.State == HubConnectionState.Connected)
 			Stage.Load(new Menu());
 	}
 }
