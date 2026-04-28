@@ -22,6 +22,7 @@ R.CreateGame("Battleship Basic")
 		 );
 		 UIPrefab.Add<Label>(string.Empty, LabelPrefab);
 		 UIPrefab.Add<Label>("big", LabelPrefabBig);
+		 UIPrefab.Add<Button>(string.Empty, ButtonPrefab);
 		 progress.Report(0.5F);
 		 await Vault.LoadResource<Texture2D>("textures/purrvert.png", "purrvert-icon");
 		 progress.Report(0.75F);
@@ -31,6 +32,12 @@ R.CreateGame("Battleship Basic")
  )
  .SetStartingScene<Splash>()
  .Run();
+void ButtonPrefab(Button e)
+{
+	Button.DefaultPrefrab(e);
+	e.label.transform = Transform.Upper;
+	e.label.position = new Vector2(0, -2);
+}
 
 void LabelPrefab(Label e)
 {

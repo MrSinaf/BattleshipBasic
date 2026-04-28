@@ -29,7 +29,8 @@ public class Lobby(bool hosting) : Scene
 		{
 			pivotAndAnchors = new Vector2(0.5F, 1),
 			size = new Vector2(200, 50),
-			cornerRadius = new Region(0, 0, 10, 10)
+			cornerRadius = new Region(0, 0, 10, 10),
+			tint = new Color(0x122333)
 		};
 		canvas.root.AddChild(panel);
 		panel.AddChild(
@@ -60,6 +61,10 @@ public class Lobby(bool hosting) : Scene
 			playerB.username = Client.username;
 		}
 		canvas.root.AddChild(layout);
+		canvas.root.AddChild(new Button("Démarrer", () => { })
+		{
+			pivotAndAnchors = new Vector2(0.5F, 0.25F)
+		});
 	}
 	
 	public override async Task Load()

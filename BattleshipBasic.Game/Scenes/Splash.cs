@@ -13,7 +13,6 @@ public class Splash : Scene
 	private Image icon = null!;
 	
 	private float time;
-	private bool connected;
 	
 	public override void Init()
 	{
